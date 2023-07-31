@@ -4,15 +4,35 @@
 rc-update add sshd default
 
 # Configure networking
+#
+# Note: Digial Ocean custom images, do not support IPv6, but we configure
+# it anyway on the hope that one day they unfuck their infrastructure.
+modprobe ipv6
+echo "ipv6" >> /etc/modules
+
 cat > /etc/network/interfaces <<-EOF
 iface lo inet loopback
 iface eth0 inet dhcp
+iface eth0 inet6 auto
+iface eth1 inet dhcp
+iface eth1 inet6 auto
+EOF
+
+cat >> /etc/hosts <<-EOF
+::1             localhost ipv6-localhost ipv6-loopback
+fe00::0         ipv6-localnet
+ff00::0         ipv6-mcastprefix
+ff02::1         ipv6-allnodes
+ff02::2         ipv6-allrouters
+ff02::3         ipv6-allhosts
 EOF
 
 ln -s networking /etc/init.d/net.lo
 ln -s networking /etc/init.d/net.eth0
+ln -s networking /etc/init.d/net.eth1
 
 rc-update add net.eth0 default
+rc-update add net.eth1 default
 rc-update add net.lo boot
 
 # Create root ssh directory
